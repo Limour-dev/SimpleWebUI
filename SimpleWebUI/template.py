@@ -11,7 +11,7 @@ html = r'''
   <link rel="stylesheet" href="{milligram}">
   <script src="{vue}"></script>
 </head>
-<body>{content}</body>
+<body>{content}{script}</body>
 </html>
 '''.strip()
 
@@ -20,3 +20,23 @@ with open(os.path.join(root, 'assets', 'css', 'milligram.min.css'), 'r', encodin
 
 with open(os.path.join(root, 'assets', 'js', 'vue.min.js'), 'r', encoding='utf-8') as rf:
     vue = rf.read()
+
+script = r'''
+<script>
+document.ws = new WebSocket("limour_ws_path");
+document.ws.onmessage = function(event) {
+    if (event.data === "pong") {
+        console.log("pong");
+    } else {
+        console.log("收到消息:", event.data);
+    }
+};
+let ws = document.ws;
+function sendHeartbeat() {
+    if (ws.readyState === WebSocket.OPEN) {
+        ws.send("ping");
+    }
+}
+document.ws_heartbeatTimer = setInterval(sendHeartbeat, 10000);
+</script>
+'''.strip()

@@ -1,6 +1,7 @@
 from aiohttp import web
 from . import template as tp
 from .elements import *
+import aiohttp
 
 class UI(Element):
     type = 'body'
@@ -43,9 +44,29 @@ class UI(Element):
                 title = self.title,
                 vue=f'{self.prefix}vue.js',
                 milligram = f'{self.prefix}milligram.css',
-                content = self.innerHTML()
+                content = self.innerHTML(),
+                script = tp.script.replace('limour_ws_path', f'{self.prefix}ws')
             ), content_type='text/html')
         self.app.router.add_get(f'{self.prefix}', index)
+        self.heartbeat()
 
     def heartbeat(self):
-        pass
+        async def websocket_handler(request):
+            ws = web.WebSocketResponse()
+            await ws.prepare(request)
+            self.connected.add(ws)
+            print('Browser connected')
+
+            try:
+                async for msg in ws:
+                    if msg.type == aiohttp.WSMsgType.TEXT:
+                        if msg.data == 'ping':
+                            await ws.send_str('pong')
+                            continue
+                        print(f"收到浏览器消息: {msg.data}")
+                        await ws.send_str(f"服务器收到: {msg.data}")
+            finally:
+                self.connected.remove(ws)
+                print('Browser disconnected')
+            return ws
+        self.app.router.add_get(f'{self.prefix}ws', websocket_handler)
