@@ -11,6 +11,7 @@ class UI(Element):
         self.title = 'SimpleWebUI'
         self.web = web
         self.app = web.Application(client_max_size=20 * 1024 ** 2)
+        self.connected = set()
 
     async def run_app(self, host='0.0.0.0', port=8118):
         self.setup()
@@ -45,3 +46,6 @@ class UI(Element):
                 content = self.innerHTML()
             ), content_type='text/html')
         self.app.router.add_get(f'{self.prefix}', index)
+
+    def heartbeat(self):
+        pass

@@ -1,8 +1,20 @@
+seed_id = 0
+def random_id():
+    chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ'
+    global seed_id
+    seed_id += 1
+    result = ''
+    num = seed_id
+    while num > 0:
+        result += chars[num % 52]
+        num //= 52
+    return result
+
 class Element:
     type = 'div'
     def __init__(self, content=None):
         self.contents = []
-        self.attributes = {}
+        self.attributes = {'id': random_id()}
         if content is None:
             return
         self.contents.append(content)
@@ -13,16 +25,12 @@ class Element:
         return res
 
     def innerHTML(self):
-        contents = (
-            (el if (type(el) is str) else el.outerHTML()) for el in self.contents
-        )
-        return ''.join(contents)
+        return ''.join((el if (type(el) is str) else el.outerHTML()) for el in self.contents)
 
     def outerHTML(self):
-        attributes = ''
-        return r'<{type}{attributes}>{content}</{type}>'.format(
+        return r'<{type} {attributes}>{content}</{type}>'.format(
             type = self.type,
-            attributes = attributes,
+            attributes = ' '.join(f'{k}="{v}"' for k,v in self.attributes.items()),
             content = self.innerHTML()
         )
 
