@@ -24,19 +24,52 @@ with open(os.path.join(root, 'assets', 'js', 'vue.min.js'), 'r', encoding='utf-8
 script = r'''
 <script>
 document.ws = new WebSocket("limour_ws_path");
-document.ws.onmessage = function(event) {
+let ws = document.ws;
+ws.addEventListener('message', function(event) {
     if (event.data === "pong") {
         console.log("pong");
     } else {
         console.log("收到消息:", event.data);
     }
-};
-let ws = document.ws;
+});
 function sendHeartbeat() {
     if (ws.readyState === WebSocket.OPEN) {
         ws.send("ping");
     }
 }
 document.ws_heartbeatTimer = setInterval(sendHeartbeat, 10000);
+
+const SRPC = () => {
+  let reqId = 1;
+  const pending = {};
+  if (!document.ws.srpcListenerInstalled) {
+    document.ws.addEventListener('message', e => {
+      try {
+        const msg = JSON.parse(e.data);
+        if (msg && msg.__SRPC && pending[msg.id]) {
+          if ('R' in msg) pending[msg.id].resolve(msg.R)
+          else pending[msg.id].reject(msg.E)
+          delete pending[msg.id];
+        }
+      } catch (e) { /* ignore */ }
+    })
+    document.ws.srpcListenerInstalled = true;
+  }
+  const getFunction = N => ((...A) => {
+    return new Promise((resolve, reject) => {
+      const id = reqId++;
+      pending[id] = { resolve, reject };
+      const msg = { type: "srpc", id, N, A };
+      document.ws.send(JSON.stringify(msg));
+    })
+  })
+  const proxyGet = (target, key) => {
+    const N = target.N || [], newN = [...N, key], f = getFunction(newN);
+    f.N = newN;
+    return new Proxy(f, { get: proxyGet });
+  }
+  return new Proxy(() => {}, { get: proxyGet });
+}
+window.srpc = SRPC()
 </script>
 '''.strip()

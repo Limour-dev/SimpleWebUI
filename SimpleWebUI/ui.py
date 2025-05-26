@@ -1,7 +1,7 @@
 from aiohttp import web
 from . import template as tp
 from .elements import *
-import aiohttp
+import aiohttp, json, traceback
 
 class UI(Element):
     type = 'body'
@@ -13,6 +13,7 @@ class UI(Element):
         self.web = web
         self.app = web.Application(client_max_size=20 * 1024 ** 2)
         self.connected = set()
+        self.srpc = {'min': min}
 
     async def run_app(self, host='0.0.0.0', port=8118):
         self.setup()
@@ -64,9 +65,28 @@ class UI(Element):
                             await ws.send_str('pong')
                             continue
                         print(f"收到浏览器消息: {msg.data}")
-                        await ws.send_str(f"服务器收到: {msg.data}")
+                        try:
+                            data = json.loads(msg.data)
+                            if data['type'] == 'srpc':
+                                try:
+                                    res = self.srpc['.'.join(data['N'])](*data['A'])
+                                    await ws.send_str(json.dumps({
+                                        '__SRPC': True,
+                                        'id': data['id'],
+                                        'R': res
+                                    }))
+                                except:
+                                    await ws.send_str(json.dumps({
+                                        '__SRPC': True,
+                                        'id': data['id'],
+                                        'E': traceback.format_exc()
+                                    }))
+                        except:
+                            traceback.print_exc()
+                        # await ws.send_str(f"服务器收到: {msg.data}")
             finally:
                 self.connected.remove(ws)
                 print('Browser disconnected')
             return ws
         self.app.router.add_get(f'{self.prefix}ws', websocket_handler)
+
