@@ -7,7 +7,6 @@ setup(
     author_email="limour@limour.top",
     packages=['SimpleWebUI'],
     install_requires=[
-        'httpx',
         'aiohttp',
     ],
 )
