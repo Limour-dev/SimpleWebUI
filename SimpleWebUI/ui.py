@@ -48,7 +48,7 @@ class UI(Element):
                 content = self.innerHTML(),
                 script = tp.script.replace('limour_ws_path', f'{self.prefix}ws')
             ), content_type='text/html')
-        self.app.router.add_get(f'{self.prefix}', index)
+        self.app.router.add_get(f'{self.prefix}'.rstrip('/'), index)
         self.heartbeat()
 
     def heartbeat(self):
