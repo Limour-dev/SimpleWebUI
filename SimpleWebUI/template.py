@@ -8,8 +8,8 @@ html = r'''
   <meta charset="UTF-8">
   <title>{title}</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link rel="stylesheet" href="">
-  <script src=""></script>
+  <link rel="stylesheet" href="{milligram}">
+  <script src="{vue}"></script>
 </head>
 <body>{content}</body>
 </html>

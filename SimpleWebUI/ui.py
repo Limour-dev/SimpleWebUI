@@ -1,27 +1,9 @@
 from aiohttp import web
 from . import template as tp
-
-class Element:
-
-    def __init__(self, content=None):
-        self.contents = []
-        if content is None:
-            return
-        elif type(content) is str:
-            pass
-
-    def label(self, content=None):
-        res = Label(content)
-        self.contents.append(res)
-        return res
-
-
-class Label(Element):
-    def __init__(self, content=None):
-        super().__init__(content)
-
+from .elements import *
 
 class UI(Element):
+    type = 'body'
     def __init__(self):
         super().__init__()
         self.prefix = '/'
@@ -42,13 +24,24 @@ class UI(Element):
         return web.run_app(self.app, host=host, port=port)
 
     def setup(self):
-        content = 'Hello World!'
+        async def js(request):
+            return web.Response(
+                text=tp.vue,
+                content_type='application/javascript'
+            )
+        self.app.router.add_get(f'{self.prefix}vue.js', js)
+        async def css(request):
+            return web.Response(
+                text=tp.milligram,
+                content_type='text/css'
+            )
+        self.app.router.add_get(f'{self.prefix}milligram.css', css)
         async def index(request):
             return web.Response(text=tp.html.format(
                 lang = self.lang,
                 title = self.title,
-                content = content
+                vue=f'{self.prefix}vue.js',
+                milligram = f'{self.prefix}milligram.css',
+                content = self.innerHTML()
             ), content_type='text/html')
         self.app.router.add_get(f'{self.prefix}', index)
-
-
