@@ -14,3 +14,15 @@
     gap: 0.62rem;
     text-align: center;
 }
+.bs-1 { flex: 0 0 8.33%; }
+.bs-2 { flex: 0 0 16.6%; }
+.bs-3 { flex: 0 0 25%; }
+.bs-4 { flex: 0 0 33.3%; }
+.bs-5 { flex: 0 0 41.6%; }
+.bs-6 { flex: 0 0 50%; }
+.bs-7 { flex: 0 0 58.3%; }
+.bs-8 { flex: 0 0 66.6%; }
+.bs-9 { flex: 0 0 75%; }
+.bs-10 { flex: 0 0 83.3%; }
+.bs-11 { flex: 0 0 91.6%; }
+.bs-12 { flex: 0 0 100%; }

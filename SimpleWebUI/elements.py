@@ -27,19 +27,21 @@ class Element:
             self.op[-1].contents.append(el)
         else:
             self.contents.append(el)
-        return el
 
     def label(self, *args, **kwargs):
         res = Label(*args, **kwargs)
-        return self.append(res)
+        self.append(res)
+        return res
 
     def column(self, *args, **kwargs):
         res = Column(*args, **kwargs)
-        return self.append(res)
+        self.append(res)
+        return res
 
     def row(self, *args, **kwargs):
         res = Row(*args, **kwargs)
-        return self.append(res)
+        self.append(res)
+        return res
 
     def innerHTML(self):
         return ''.join((el if (type(el) is str) else el.outerHTML()) for el in self.contents)
