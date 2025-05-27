@@ -59,7 +59,7 @@ const SRPC = () => {
     return new Promise((resolve, reject) => {
       const id = reqId++;
       pending[id] = { resolve, reject };
-      const msg = { type: "srpc", id, N, A };
+      const msg = { T: "rpc", id, N, A };
       document.ws.send(JSON.stringify(msg));
     })
   })

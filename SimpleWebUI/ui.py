@@ -1,7 +1,7 @@
 from aiohttp import web
 from . import template as tp
 from .elements import *
-import aiohttp, json, traceback
+import aiohttp, json, traceback, asyncio
 
 class UI(Element):
     type = 'body'
@@ -68,7 +68,7 @@ class UI(Element):
                         print(f"收到浏览器消息: {msg.data}")
                         try:
                             data = json.loads(msg.data)
-                            if data['type'] == 'srpc':
+                            if data['T'] == 'rpc':
                                 try:
                                     res = self.srpc['.'.join(data['N'])](*data['A'])
                                     await ws.send_str(json.dumps({
@@ -90,4 +90,11 @@ class UI(Element):
                 print('Browser disconnected')
             return ws
         self.app.router.add_get(f'{self.prefix}ws', websocket_handler)
-
+    async def ws_send(self, text):
+        return await asyncio.gather(ws.send_str(text) for ws in self.connected)
+    async def notify(self, text):
+        await self.ws_send(json.dumps({
+            'T': 'rpc',
+            'N': 'alert',
+            'A': [text]
+        }))
