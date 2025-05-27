@@ -7,6 +7,7 @@ class UI(Element):
     type = 'body'
     def __init__(self):
         super().__init__()
+        self.root = self
         self.prefix = '/'
         self.lang = 'zh-CN'
         self.title = 'SimpleWebUI'
