@@ -2,6 +2,15 @@ import asyncio
 import inspect
 from threading import Thread
 
+async def try_call(callback, args):
+    try:
+        task = callback(*args)
+        if inspect.iscoroutine(task):
+            task = await task
+        return task
+    except Exception as e:
+        print(e)
+
 class RunAfter:
 
     def event_loop(self):
@@ -18,19 +27,10 @@ class RunAfter:
             self.loop = loop
 
     def __call__(self, intervals, callback, *args):
-        task = self.try_call(callback, args)
+        task = try_call(callback, args)
         if intervals <= 0:
-            self.run(task)
-            return
-        self.loop.call_later(intervals, self.run, task)
+            return self.run(task)
+        return self.loop.call_later(intervals, self.run, task)
 
     def run(self, task):
-        asyncio.run_coroutine_threadsafe(task, self.loop)
-
-    async def try_call(self, callback, args):
-        try:
-            task = callback(*args)
-            if inspect.iscoroutine(task):
-                self.run(task)
-        except Exception as e:
-            print(e)
+        return asyncio.run_coroutine_threadsafe(task, self.loop)

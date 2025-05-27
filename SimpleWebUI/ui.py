@@ -98,9 +98,9 @@ class UI(Element):
             return ws
         self.app.router.add_get(f'{self.prefix}ws', websocket_handler)
     async def ws_send(self, text):
-        return await asyncio.gather(ws.send_str(text) for ws in self.connected)
+        return await asyncio.gather(*(ws.send_str(text) for ws in self.connected))
     async def notify(self, text):
-        await self.ws_send(j2s({
+        return await self.ws_send(j2s({
             'T': 'rpc',
             'N': 'alert',
             'A': [text]

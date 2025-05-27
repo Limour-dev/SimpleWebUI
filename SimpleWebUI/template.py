@@ -39,6 +39,10 @@ function sendHeartbeat() {
 }
 document.ws_heartbeatTimer = setInterval(sendHeartbeat, 10000);
 
+function getFunctionByPath(path) {
+    return path.split('.').reduce((obj, key) => obj && obj[key], window);
+}
+
 const SRPC = () => {
   let reqId = 1;
   const pending = {};
@@ -50,6 +54,9 @@ const SRPC = () => {
           if ('R' in msg) pending[msg.id].resolve(msg.R)
           else pending[msg.id].reject(msg.E)
           delete pending[msg.id];
+        } else if (msg && msg.T === "rpc") {
+          const fn = getFunctionByPath(msg.N);
+          fn(...msg.A);
         }
       } catch (e) { /* ignore */ }
     })
