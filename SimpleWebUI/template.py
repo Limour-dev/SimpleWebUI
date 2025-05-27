@@ -11,7 +11,7 @@ html = r'''
   <link rel="stylesheet" href="{milligram}">
   <script src="{vue}"></script>
 </head>
-<body>{content}{script}</body>
+<body><div id='app'>{content}</div>{script}</body>
 </html>
 '''.strip()
 
@@ -70,6 +70,16 @@ const SRPC = () => {
   }
   return new Proxy(() => {}, { get: proxyGet });
 }
-window.srpc = SRPC()
+window.srpc = SRPC();
+window.app = new Vue({
+el: '#app',
+data: limour_vue_data,
+methods: limour_vue_methods,
+});
 </script>
+'''.strip()
+
+methods = '''
+{
+}
 '''.strip()

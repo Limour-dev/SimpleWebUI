@@ -28,8 +28,19 @@ class Element:
         else:
             self.contents.append(el)
 
-    def label(self, *args, **kwargs):
+    @property
+    def did(self):
+        return 'd' + self.attributes['id']
+
+    def label(self, text='', *args, **kwargs):
         res = Label(*args, **kwargs)
+        self.root.data[res.did] = text
+        self.append(res)
+        return res
+
+    def button(self, text='', *args, **kwargs):
+        res = Button(*args, **kwargs)
+        self.root.data[res.did] = text
         self.append(res)
         return res
 
@@ -44,7 +55,7 @@ class Element:
         return res
 
     def innerHTML(self):
-        return ''.join((el if (type(el) is str) else el.outerHTML()) for el in self.contents)
+        return ''.join(el.outerHTML() for el in self.contents)
 
     def outerHTML(self):
         return r'<{type} {attributes}>{content}</{type}>'.format(
@@ -71,6 +82,9 @@ class Element:
 
 class Label(Element):
     type = 'label'
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.attributes['v-text'] = self.did
 
 class Column(Element):
     def __init__(self, *args, **kwargs):
@@ -81,3 +95,9 @@ class Row(Element):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.classes('horizontal')
+
+class Button(Element):
+    type = 'button'
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.attributes['v-text'] = self.did

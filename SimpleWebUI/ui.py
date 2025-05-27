@@ -3,8 +3,12 @@ from . import template as tp
 from .elements import *
 import aiohttp, json, traceback, asyncio
 
+def j2s(obj):
+    return json.dumps(obj, ensure_ascii=False)
+
 class UI(Element):
     type = 'body'
+    data = {}
     def __init__(self):
         super().__init__()
         self.root = self
@@ -40,6 +44,9 @@ class UI(Element):
                 content_type='text/css'
             )
         self.app.router.add_get(f'{self.prefix}milligram.css', css)
+        script = tp.script.replace('limour_ws_path', f'{self.prefix}ws')
+        script = script.replace('limour_vue_methods', tp.methods)
+        script = script.replace('limour_vue_data', j2s(self.data))
         async def index(request):
             return web.Response(text=tp.html.format(
                 lang = self.lang,
@@ -47,7 +54,7 @@ class UI(Element):
                 vue=f'{self.prefix}vue.js',
                 milligram = f'{self.prefix}milligram.css',
                 content = self.innerHTML(),
-                script = tp.script.replace('limour_ws_path', f'{self.prefix}ws')
+                script = script
             ), content_type='text/html')
         self.app.router.add_get(f'{self.prefix}'.rstrip('/'), index)
         self.heartbeat()
@@ -71,13 +78,13 @@ class UI(Element):
                             if data['T'] == 'rpc':
                                 try:
                                     res = self.srpc['.'.join(data['N'])](*data['A'])
-                                    await ws.send_str(json.dumps({
+                                    await ws.send_str(j2s({
                                         '__SRPC': True,
                                         'id': data['id'],
                                         'R': res
                                     }))
                                 except:
-                                    await ws.send_str(json.dumps({
+                                    await ws.send_str(j2s({
                                         '__SRPC': True,
                                         'id': data['id'],
                                         'E': traceback.format_exc()
@@ -93,7 +100,7 @@ class UI(Element):
     async def ws_send(self, text):
         return await asyncio.gather(ws.send_str(text) for ws in self.connected)
     async def notify(self, text):
-        await self.ws_send(json.dumps({
+        await self.ws_send(j2s({
             'T': 'rpc',
             'N': 'alert',
             'A': [text]
