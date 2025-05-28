@@ -42,6 +42,15 @@ document.ws_heartbeatTimer = setInterval(sendHeartbeat, 10000);
 function getFunctionByPath(path) {
     return path.split('.').reduce((obj, key) => obj && obj[key], window);
 }
+function diffObject(a, b) {
+  let c = {};
+  Object.keys(b).forEach(key => {
+    if (b[key] !== a[key]) {
+      c[key] = a[key];
+    }
+  });
+  return c;
+}
 
 const SRPC = () => {
   let reqId = 1;
@@ -93,6 +102,13 @@ el: '#app',
 data: vue_d,
 methods: limour_vue_methods,
 });
+window.ws_update = () => {
+    let D = diffObject(app, vue_v);
+    if (Object.keys(D).length > 0){
+        document.ws.send(JSON.stringify({ T: "upd", D }));
+    }
+    return D;
+}
 </script>
 '''.strip()
 

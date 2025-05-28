@@ -47,8 +47,6 @@ class UI(Element):
         self.app.router.add_get(f'{self.prefix}milligram.css', css)
         script = tp.script.replace('limour_ws_path', f'{self.prefix}ws')
         script = script.replace('limour_vue_methods', tp.methods)
-        script = script.replace('limour_vue_vals', j2s(self.vals))
-        script = script.replace('limour_vue_data', j2s(self.data))
         async def index(request):
             return web.Response(text=tp.html.format(
                 lang = self.lang,
@@ -56,7 +54,8 @@ class UI(Element):
                 vue=f'{self.prefix}vue.js',
                 milligram = f'{self.prefix}milligram.css',
                 content = self.innerHTML(),
-                script = script
+                script = script.replace('limour_vue_vals', j2s(self.vals))\
+                    .replace('limour_vue_data', j2s(self.data))
             ), content_type='text/html')
         self.app.router.add_get(f'{self.prefix}'.rstrip('/'), index)
         self.heartbeat()
@@ -91,6 +90,9 @@ class UI(Element):
                                         'id': data['id'],
                                         'E': traceback.format_exc()
                                     }))
+                            elif data['T'] == 'upd':
+                                self.vals.update(data['D'])
+                                await self.ws_update(data['D'])
                         except:
                             traceback.print_exc()
                         # await ws.send_str(f"服务器收到: {msg.data}")
