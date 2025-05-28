@@ -18,7 +18,8 @@ class Element:
     root = None
     def __init__(self, content=None, id=None):
         self.contents = []
-        self.attributes = {'id': id if id else random_id()}
+        self._id = id if id else random_id()
+        self.attributes = {}
         if content is None:
             return
         self.contents.append(content)
@@ -32,7 +33,7 @@ class Element:
 
     @property
     def did(self):
-        return 'd' + self.attributes['id']
+        return 'd' + self._id
 
     def label(self, text='', *args, **kwargs):
         res = Label(*args, **kwargs)
@@ -73,11 +74,18 @@ class Element:
         return ''.join(el.outerHTML() for el in self.contents)
 
     def outerHTML(self):
-        return r'<{type} {attributes}>{content}</{type}>'.format(
-            type = self.type,
-            attributes = ' '.join(f'{k}="{v}"' for k,v in self.attributes.items()),
-            content = self.innerHTML()
-        )
+        if self.attributes:
+            return r'<{type} {attributes}>{content}</{type}>'.format(
+                type=self.type,
+                attributes=' '.join(f'{k}="{v}"' for k, v in self.attributes.items()),
+                content=self.innerHTML()
+            )
+        else:
+            return r'<{type}>{content}</{type}>'.format(
+                type=self.type,
+                content=self.innerHTML()
+            )
+
     def classes(self, classes):
         if 'class' in self.attributes:
             self.attributes['class'] += f' {classes}'

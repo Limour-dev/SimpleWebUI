@@ -11,7 +11,7 @@ html = r'''
   <link rel="stylesheet" href="{milligram}">
   <script src="{vue}"></script>
 </head>
-<body><div id='app'>{content}</div>{script}</body>
+<body><div id='app' style="display: flex;justify-content: center;">{content}</div>{script}</body>
 </html>
 '''.strip()
 
