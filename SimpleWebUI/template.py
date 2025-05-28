@@ -59,6 +59,11 @@ const SRPC = () => {
           fn(...msg.A);
         } else if (msg && msg.T === "upd") {
           Object.assign(app, msg.D);
+          Object.keys(vue_v).forEach(key => {
+              if (msg.D.hasOwnProperty(key)) {
+                vue_v[key] = msg.D[key];
+              }
+          });
         }
       } catch (e) { /* ignore */ }
     })
@@ -80,9 +85,12 @@ const SRPC = () => {
   return new Proxy(() => {}, { get: proxyGet });
 }
 window.srpc = SRPC();
+let vue_d = limour_vue_data;
+window.vue_v = limour_vue_vals;
+Object.assign(vue_d, vue_v);
 window.app = new Vue({
 el: '#app',
-data: limour_vue_data,
+data: vue_d,
 methods: limour_vue_methods,
 });
 </script>

@@ -49,7 +49,7 @@ class Element:
 
     def pinput(self, text='', *args, **kwargs):
         res = PInput(*args, **kwargs)
-        self.root.data[res.did] = text
+        self.root.vals[res.did] = text
         self.append(res)
         return res
 

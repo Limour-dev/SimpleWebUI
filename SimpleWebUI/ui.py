@@ -9,6 +9,7 @@ def j2s(obj):
 class UI(Element):
     type = 'body'
     data = {}
+    vals = {}
     def __init__(self):
         super().__init__()
         self.root = self
@@ -46,6 +47,7 @@ class UI(Element):
         self.app.router.add_get(f'{self.prefix}milligram.css', css)
         script = tp.script.replace('limour_ws_path', f'{self.prefix}ws')
         script = script.replace('limour_vue_methods', tp.methods)
+        script = script.replace('limour_vue_vals', j2s(self.vals))
         script = script.replace('limour_vue_data', j2s(self.data))
         async def index(request):
             return web.Response(text=tp.html.format(
