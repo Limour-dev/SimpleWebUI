@@ -57,6 +57,8 @@ const SRPC = () => {
         } else if (msg && msg.T === "rpc") {
           const fn = getFunctionByPath(msg.N);
           fn(...msg.A);
+        } else if (msg && msg.T === "upd") {
+          Object.assign(app, msg.D);
         }
       } catch (e) { /* ignore */ }
     })

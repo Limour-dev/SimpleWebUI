@@ -105,3 +105,8 @@ class UI(Element):
             'N': 'alert',
             'A': [text]
         }))
+    async def ws_update(self, data):
+        return await self.ws_send(j2s({
+            'T': 'upd',
+            'D': data
+        }))
