@@ -1,3 +1,5 @@
+from winreg import QueryInfoKey
+
 seed_id = 0
 def random_id():
     chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ'
@@ -41,6 +43,19 @@ class Element:
     def button(self, text='', *args, **kwargs):
         res = Button(*args, **kwargs)
         self.root.data[res.did] = text
+        self.append(res)
+        return res
+
+    def pinput(self, text='', *args, **kwargs):
+        res = PInput(*args, **kwargs)
+        self.root.data[res.did] = text
+        self.append(res)
+        return res
+
+    def link(self, text='', target='', *args, **kwargs):
+        res = Link(*args, **kwargs)
+        self.root.data[res.did] = text
+        self.root.data[res.did + '_h'] = target
         self.append(res)
         return res
 
@@ -101,3 +116,17 @@ class Button(Element):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.attributes['v-text'] = self.did
+
+class PInput(Element):
+    type = 'input'
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.attributes['v-model'] = self.did
+
+class Link(Element):
+    type = 'a'
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.attributes['v-text'] = self.did
+        self.attributes[':href'] = self.did + '_h'
+        self.attributes['target'] = "_blank"
