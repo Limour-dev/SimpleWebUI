@@ -135,6 +135,9 @@ class Button(Element):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.attributes['v-text'] = self.did
+        self.attributes['@click'] = f"srpc.click('{self._id}')"
+    async def click(self):
+        print(self._id, 'clicked')
 
 class PInput(Element):
     type = 'input'

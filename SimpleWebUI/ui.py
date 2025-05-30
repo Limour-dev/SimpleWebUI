@@ -21,7 +21,10 @@ class UI(Element):
         self.web = web
         self.app = web.Application(client_max_size=20 * 1024 ** 2)
         self.connected = set()
-        self.srpc = {'min': min}
+        self.srpc = {'click': self.click}
+
+    async def click(self, _id):
+        return await self.ids[_id].click()
 
     async def run_app(self, host='0.0.0.0', port=8118):
         self.setup()
@@ -83,7 +86,7 @@ class UI(Element):
                                 await self.ws_update(data['D'])
                             if data['T'].endswith('rpc'):
                                 try:
-                                    res = self.srpc['.'.join(data['N'])](*data['A'])
+                                    res = await self.srpc['.'.join(data['N'])](*data['A'])
                                     await ws.send_str(j2s({
                                         'T': 'rcr',
                                         'id': data['id'],
