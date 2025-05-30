@@ -4,10 +4,12 @@ run = RunAfter()
 
 with ui.column().classes('bs-4'):
     ui.link("Limour's Blog", target='https://hexo.limour.top/')
-    ui.label('Hello, world!')
-    d_pi = ui.pinput('test')
+    ui.label('Hello, world!', id='itest')
+    ui.pinput('test', id='iinput')
     with ui.row():
         ui.button('Click me!').classes('bs-6')
 
 run(0, ui.run_app)
-# run(0, ui.ws_update, {d_pi.did: 'change'})
+# ui.itest.v = 'limour'
+# run(0, ui.commit)
+# print(ui.iinput.v)

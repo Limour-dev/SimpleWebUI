@@ -59,20 +59,21 @@ const SRPC = () => {
     document.ws.addEventListener('message', e => {
       try {
         const msg = JSON.parse(e.data);
-        if (msg && msg.__SRPC && pending[msg.id]) {
-          if ('R' in msg) pending[msg.id].resolve(msg.R)
-          else pending[msg.id].reject(msg.E)
-          delete pending[msg.id];
-        } else if (msg && msg.T === "rpc") {
-          const fn = getFunctionByPath(msg.N);
-          fn(...msg.A);
-        } else if (msg && msg.T === "upd") {
+        if (msg && msg.T.startsWith("upd")) {
           Object.assign(app, msg.D);
           Object.keys(vue_v).forEach(key => {
               if (msg.D.hasOwnProperty(key)) {
                 vue_v[key] = msg.D[key];
               }
           });
+        }
+        if (msg && msg.T.endsWith("rcr") && pending[msg.id]) {
+          if ('R' in msg) pending[msg.id].resolve(msg.R)
+          else pending[msg.id].reject(msg.E)
+          delete pending[msg.id];
+        } else if (msg && msg.T.endsWith("rpc")) {
+          const fn = getFunctionByPath(msg.N);
+          fn(...msg.A);
         }
       } catch (e) { /* ignore */ }
     })

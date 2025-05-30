@@ -10,6 +10,8 @@ class UI(Element):
     type = 'body'
     data = {}
     vals = {}
+    ids = {}
+    delta = {}
     def __init__(self):
         super().__init__()
         self.root = self
@@ -76,23 +78,23 @@ class UI(Element):
                         print(f"收到浏览器消息: {msg.data}")
                         try:
                             data = json.loads(msg.data)
-                            if data['T'] == 'rpc':
+                            if data['T'].startswith('upd'):
+                                self.vals.update(data['D'])
+                                await self.ws_update(data['D'])
+                            if data['T'].endswith('rpc'):
                                 try:
                                     res = self.srpc['.'.join(data['N'])](*data['A'])
                                     await ws.send_str(j2s({
-                                        '__SRPC': True,
+                                        'T': 'rcr',
                                         'id': data['id'],
                                         'R': res
                                     }))
                                 except:
                                     await ws.send_str(j2s({
-                                        '__SRPC': True,
+                                        'T': 'rcr',
                                         'id': data['id'],
                                         'E': traceback.format_exc()
                                     }))
-                            elif data['T'] == 'upd':
-                                self.vals.update(data['D'])
-                                await self.ws_update(data['D'])
                         except:
                             traceback.print_exc()
                         # await ws.send_str(f"服务器收到: {msg.data}")
@@ -114,3 +116,17 @@ class UI(Element):
             'T': 'upd',
             'D': data
         }))
+    def __getattr__(self, name) -> Element:
+        return self.ids[name]
+    async def commit(self):
+        if not self.delta:
+            return
+        for k,v in self.delta.items():
+            if k in self.data:
+                self.data[k] = v
+            elif k in self.vals:
+                self.vals[k] = v
+            else:
+                print(k, v, 'not found')
+        await self.ws_update(self.delta)
+        self.delta = {}

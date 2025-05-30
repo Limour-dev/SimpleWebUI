@@ -30,6 +30,7 @@ class Element:
             self.op[-1].contents.append(el)
         else:
             self.contents.append(el)
+        self.root.ids[el._id] = el
 
     @property
     def did(self):
@@ -102,6 +103,16 @@ class Element:
             self.root.op.pop()
         else:
             self.root.op = None
+    @property
+    def v(self):
+        did = self.did
+        if did in self.root.vals:
+            return self.root.vals[did]
+        else:
+            return self.root.data[self.did]
+    @v.setter
+    def v(self, text=''):
+        self.root.delta[self.did] = text
 
 class Label(Element):
     type = 'label'
