@@ -106,7 +106,9 @@ class Element:
     @property
     def v(self):
         did = self.did
-        if did in self.root.vals:
+        if did in self.root.delta:
+            return self.root.delta[did]
+        elif did in self.root.vals:
             return self.root.vals[did]
         else:
             return self.root.data[self.did]
@@ -130,14 +132,16 @@ class Row(Element):
         super().__init__(*args, **kwargs)
         self.classes('horizontal')
 
+async def btnClick(ui, el):
+    print(el._id, 'clicked')
+
 class Button(Element):
     type = 'button'
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.attributes['v-text'] = self.did
         self.attributes['@click'] = f"srpc.click('{self._id}')"
-    async def click(self):
-        print(self._id, 'clicked')
+        self.click = btnClick
 
 class PInput(Element):
     type = 'input'

@@ -7,9 +7,11 @@ with ui.column().classes('bs-4'):
     ui.label('Hello, world!', id='itest')
     ui.pinput('test', id='iinput')
     with ui.row():
-        ui.button('Click me!').classes('bs-6')
+        ui.button('Click me!', id='btn').classes('bs-6')
+
+async def click(_ui, el):
+    _ui.iinput.v = 'hello ' + _ui.iinput.v
+    _ui.itest.v = 'button clicked'
+ui.btn.click = click
 
 run(0, ui.run_app)
-# ui.itest.v = 'limour'
-# run(0, ui.commit)
-# print(ui.iinput.v)

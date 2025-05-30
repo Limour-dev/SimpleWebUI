@@ -83,7 +83,13 @@ const SRPC = () => {
     return new Promise((resolve, reject) => {
       const id = reqId++;
       pending[id] = { resolve, reject };
-      const msg = { T: "rpc", id, N, A };
+      let D = ws_update(false);
+      let msg;
+      if (Object.keys(D).length > 0){
+        msg = { T: "updrpc", id, N, A, D};
+      } else {
+        msg = { T: "rpc", id, N, A };
+      }
       document.ws.send(JSON.stringify(msg));
     })
   })
@@ -103,9 +109,9 @@ el: '#app',
 data: vue_d,
 methods: limour_vue_methods,
 });
-window.ws_update = () => {
+window.ws_update = (flag_s = true) => {
     let D = diffObject(app, vue_v);
-    if (Object.keys(D).length > 0){
+    if (flag_s && Object.keys(D).length > 0){
         document.ws.send(JSON.stringify({ T: "upd", D }));
     }
     return D;

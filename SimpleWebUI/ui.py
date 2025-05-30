@@ -24,7 +24,8 @@ class UI(Element):
         self.srpc = {'click': self.click}
 
     async def click(self, _id):
-        return await self.ids[_id].click()
+        el = self.ids[_id]
+        return await el.click(self, el)
 
     async def run_app(self, host='0.0.0.0', port=8118):
         self.setup()
@@ -87,11 +88,21 @@ class UI(Element):
                             if data['T'].endswith('rpc'):
                                 try:
                                     res = await self.srpc['.'.join(data['N'])](*data['A'])
-                                    await ws.send_str(j2s({
-                                        'T': 'rcr',
-                                        'id': data['id'],
-                                        'R': res
-                                    }))
+                                    if self.delta:
+                                        D = await self.commit(False)
+                                        await ws.send_str(j2s({
+                                            'T': 'updrcr',
+                                            'id': data['id'],
+                                            'R': res,
+                                            'D': D
+                                        }))
+                                        await self.ws_update(D, ws)
+                                    else:
+                                        await ws.send_str(j2s({
+                                            'T': 'rcr',
+                                            'id': data['id'],
+                                            'R': res
+                                        }))
                                 except:
                                     await ws.send_str(j2s({
                                         'T': 'rcr',
@@ -106,22 +117,22 @@ class UI(Element):
                 print('Browser disconnected')
             return ws
         self.app.router.add_get(f'{self.prefix}ws', websocket_handler)
-    async def ws_send(self, text):
-        return await asyncio.gather(*(ws.send_str(text) for ws in self.connected))
+    async def ws_send(self, text, ex=None):
+        return await asyncio.gather(*(ws.send_str(text) for ws in self.connected if ws is not ex))
     async def notify(self, text):
         return await self.ws_send(j2s({
             'T': 'rpc',
             'N': 'alert',
             'A': [text]
         }))
-    async def ws_update(self, data):
+    async def ws_update(self, data, ex=None):
         return await self.ws_send(j2s({
             'T': 'upd',
             'D': data
-        }))
+        }), ex=ex)
     def __getattr__(self, name) -> Element:
         return self.ids[name]
-    async def commit(self):
+    async def commit(self, flag_s=True):
         if not self.delta:
             return
         for k,v in self.delta.items():
@@ -131,5 +142,8 @@ class UI(Element):
                 self.vals[k] = v
             else:
                 print(k, v, 'not found')
-        await self.ws_update(self.delta)
+        if flag_s:
+            await self.ws_update(self.delta)
+        res = self.delta
         self.delta = {}
+        return res
